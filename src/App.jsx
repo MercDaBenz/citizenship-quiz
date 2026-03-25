@@ -342,12 +342,9 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 4000,
-          stream: true,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: "user", content: userPrompt }],
-        }),
+           language,
+            uscisQuestions: picked.map(i => ({ index: i, q: USCIS_QA[i].q, a: USCIS_QA[i].a })),
+          }),
       });
 
       if (!res.ok) {

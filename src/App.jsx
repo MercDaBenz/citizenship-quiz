@@ -473,7 +473,7 @@ export default function App() {
 
   const optStyle = (opt) => {
     const q = questions[qIndex];
-    const base = { width:"100%", textAlign:"left", padding:"0.7rem 1rem", borderRadius:"0.75rem", border:"2px solid", fontWeight:500, cursor: revealed ? "default" : "pointer", fontSize:"0.95rem", background:"white", display:"block", marginBottom:"0.45rem", transition:"background 0.15s" };
+    const base = { width:"100%", textAlign:"left", padding:"0.7rem 1rem", borderRadius:"0.75rem", border:"2px solid", fontWeight:500, cursor: revealed ? "default" : "pointer", fontSize:"0.95rem", background:"white", display:"block", marginBottom:"0.45rem", transition:"background 0.15s", color:"#1f2937" };
     if (!revealed)               return { ...base, borderColor:"#e5e7eb" };
     if (opt === q?.answer)       return { ...base, borderColor:"#4ade80", background:"#f0fdf4", color:"#166534" };
     if (opt === selected)        return { ...base, borderColor:"#f87171", background:"#fef2f2", color:"#991b1b" };
@@ -516,6 +516,9 @@ export default function App() {
           {/* question */}
           <p style={{ fontWeight:700, fontSize:"1.05rem", color:"#1f2937", marginBottom:"1.1rem", lineHeight:1.45 }}>{q.question}</p>
           {/* options */}
+          
+          console.log("Question options:", JSON.stringify(q.options));
+
           {["A","B","C","D"].map((opt, i) => (
             <button key={opt} style={optStyle(opt)} onClick={() => handleSelect(opt)}>
               <span style={{ fontWeight:800, marginRight:"0.4rem" }}>{opt}.</span>{q.options[i]}

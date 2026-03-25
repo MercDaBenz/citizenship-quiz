@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 const LANGUAGES = ["English","Spanish","French","Portuguese","Chinese","Arabic","Vietnamese","Korean","Tagalog","Hindi"];
-const API_URL = "https://api.anthropic.com/v1/messages";
+const API_URL = import.meta.env.VITE_API_URL || "https://wkkajorbrc.execute-api.us-east-1.amazonaws.com/prod/quiz";
 
 const TITLE_TRANSLATIONS = [
   { text: "Let's Make You a Citizen!", lang: "English" },

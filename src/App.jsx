@@ -517,7 +517,7 @@ export default function App() {
           <p style={{ fontWeight:700, fontSize:"1.05rem", color:"#1f2937", marginBottom:"1.1rem", lineHeight:1.45 }}>{q.question}</p>
           {/* options */}
           
-          console.log("Question options:", JSON.stringify(q.options));
+        
 
           {["A","B","C","D"].map((opt, i) => (
             <button key={opt} style={optStyle(opt)} onClick={() => handleSelect(opt)}>

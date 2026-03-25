@@ -19,7 +19,13 @@ let cachedApiKey = null;
 async function getApiKey() {
   if (cachedApiKey) return cachedApiKey;
   const res = await sm.send(new GetSecretValueCommand({ SecretId: SECRET_ID }));
-  cachedApiKey = JSON.parse(res.SecretString).key;
+  const secret = res.SecretString;
+  // Handle both plain text and JSON formats
+  try {
+    cachedApiKey = JSON.parse(secret).key;
+  } catch {
+    cachedApiKey = secret; // plain text fallback
+  }
   return cachedApiKey;
 }
 

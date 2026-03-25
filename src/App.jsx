@@ -352,46 +352,34 @@ export default function App() {
         throw new Error(err?.error?.message || `HTTP ${res.status}`);
       }
 
-      const reader  = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = "", raw = "";
+     
+      const data = await res.json();
+      console.log("API response:", JSON.stringify(data).slice(0, 200));
+      if(!data.questions?.length) throw new Error("No questions returned.");
 
-      outer: while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += decoder.decode(value, { stream: true });
-
-        const lines = buf.split("\n");
-        buf = lines.pop() ?? "";
-
-        for (const line of lines) {
-          if (!line.startsWith("data: ")) continue;
-          const payload = line.slice(6).trim();
-          if (payload === "[DONE]") break outer;
-          try {
-            const evt = JSON.parse(payload);
-            if (evt.type === "content_block_delta" && evt.delta?.type === "text_delta") {
-              raw += evt.delta.text;
-              const parsed = parseStreamedQuestions(raw);
-              questionsRef.current = parsed;
-            }
-          } catch (_) {}
-        }
-      }
+      const finalQs = data.questions;
+      questionsRef.current = finalQs;
+        setQuestions(finalQs);
+        setTotalQ(finalQs.length);
+        setHistory(h => h.map((e, i) =>
+          i === h.length - 1 ? { ...e, questions: finalQs, total: finalQs.length } : e
+    ));
+    setStarting(false);
+    setScreen("quiz");
 
       // Wait for full stream to complete, then show all questions at once
-      const finalQs = questionsRef.current;
-      if (finalQs.length === 0) {
-        throw new Error("Could not generate questions. Please try again.");
-      }
+     // const finalQs = questionsRef.current;
+      //if (finalQs.length === 0) {
+        //throw new Error("Could not generate questions. Please try again.");
+      //}
 
-      setQuestions(finalQs);
-      setTotalQ(finalQs.length);
-      setHistory(h => h.map((e, i) =>
-        i === h.length - 1 ? { ...e, questions: finalQs, total: finalQs.length } : e
-      ));
-      setStarting(false);
-      setScreen("quiz");
+      //setQuestions(finalQs);
+      //setTotalQ(finalQs.length);
+      //setHistory(h => h.map((e, i) =>
+      //  i === h.length - 1 ? { ...e, questions: finalQs, total: finalQs.length } : e
+      //));
+      //setStarting(false);
+      //setScreen("quiz");
 
     } catch (e) {
       setError(e.message || "Something went wrong. Please try again.");
@@ -721,4 +709,4 @@ export default function App() {
       </div>
     </div>
   );
-}
+  }

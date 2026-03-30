@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>citizentest.me — App Review</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #1a237e, #0d0d2b);
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      color: #1f2937;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      color: white;
+    }
+
+    .header .emoji { font-size: 3rem; display: block; margin-bottom: 0.5rem; }
+    .header h1 { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .header p { color: #93c5fd; font-size: 0.95rem; }
+
+    .card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+
+    .section-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #1d4ed8;
+      margin-bottom: 1.25rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #eff6ff;
+    }
+
+    .question { margin-bottom: 1.5rem; }
+    .question:last-child { margin-bottom: 0; }
+
+    .question label {
+      display: block;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 0.6rem;
+      line-height: 1.4;
+    }
+
+    .question label .req { color: #ef4444; margin-left: 2px; }
+
+    input[type="text"],
+    input[type="email"],
+    textarea,
+    select {
+      width: 100%;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      font-size: 0.9rem;
+      font-family: inherit;
+      color: #1f2937;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus,
+    select:focus { border-color: #1d4ed8; }
+
+    textarea { resize: vertical; min-height: 80px; }
+
+    /* Star / scale rating */
+    .scale {
+      display: flex;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .scale input { display: none; }
+
+    .scale label {
+      width: 2.4rem;
+      height: 2.4rem;
+      border-radius: 50%;
+      border: 2px solid #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      color: #6b7280;
+      transition: all 0.15s;
+      margin-bottom: 0;
+    }
+
+    .scale input:checked + label,
+    .scale label:hover {
+      background: #1d4ed8;
+      border-color: #1d4ed8;
+      color: white;
+    }
+
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.72rem;
+      color: #9ca3af;
+      margin-top: 0.3rem;
+    }
+
+    /* Radio / checkbox group */
+    .options { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 0.6rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 0.9rem;
+      color: #374151;
+    }
+
+    .option:hover { border-color: #1d4ed8; background: #eff6ff; }
+
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      accent-color: #1d4ed8;
+      flex-shrink: 0;
+    }
+
+    .option input[type="radio"]:checked ~ span,
+    .option input[type="checkbox"]:checked ~ span { color: #1d4ed8; font-weight: 600; }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #1d4ed8, #b91c1c);
+      color: white;
+      font-weight: 700;
+      font-size: 1.05rem;
+      padding: 1rem;
+      border-radius: 0.75rem;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      box-shadow: 0 4px 14px rgba(29,78,216,0.4);
+      transition: opacity 0.2s;
+    }
+
+    .submit-btn:hover { opacity: 0.9; }
+
+    /* Thank you screen */
+    .thankyou {
+      display: none;
+      text-align: center;
+      padding: 3rem 1.5rem;
+    }
+
+    .thankyou .emoji { font-size: 4rem; display: block; margin-bottom: 1rem; }
+    .thankyou h2 { font-size: 1.75rem; font-weight: 800; color: #1f2937; margin-bottom: 0.5rem; }
+    .thankyou p { color: #6b7280; font-size: 0.95rem; }
+
+    .progress-bar {
+      height: 4px;
+      background: #e5e7eb;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1d4ed8, #b91c1c);
+      border-radius: 999px;
+      width: 0%;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span class="emoji">🗽</span>
+      <h1>Help Us Improve!</h1>
+      <p>Share your experience with citizentest.me — takes about 3 minutes</p>
+    </div>
+
+    <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+    <form id="survey" onsubmit="handleSubmit(event)">
+
+      <!-- Section 1: About You -->
+      <div class="card">
+        <div class="section-title">About You</div>
+
+        <div class="question">
+          <label>Your name <span style="color:#9ca3af;font-weight:400">(optional)</span></label>
+          <input type="text" name="name" placeholder="e.g. Maria" />
+        </div>
+
+        <div class="question">
+          <label>Your email <span style="color:#9ca3af;font-weight:400">(optional — only if you want a follow-up)</span></label>
+          <input type="email" name="email" placeholder="you@example.com" />
+        </div>
+
+        <div class="question">
+          <label>Are you currently preparing for the U.S. citizenship test? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="preparing" value="yes" required /><span>Yes, actively preparing</span></label>
+            <label class="option"><input type="radio" name="preparing" value="soon" /><span>Not yet but planning to</span></label>
+            <label class="option"><input type="radio" name="preparing" value="helping" /><span>Helping someone else prepare</span></label>
+            <label class="option"><input type="radio" name="preparing" value="curious" /><span>Just curious / testing the app</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label>What device did you use? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="device" value="phone" required /><span>Phone</span></label>
+            <label class="option"><input type="radio" name="device" value="tablet" /><span>Tablet</span></label>
+            <label class="option"><input type="radio" name="device" value="desktop" /><span>Desktop / Laptop</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Usability -->
+      <div class="card">
+        <div class="section-title">Usability</div>
+
+        <div class="question">
+          <label>Was it clear what the app does when you first arrived? <span class="req">*</span></label>
+          <div class="scale">
+            <input type="radio" name="clarity" id="c1" value="1" required /><label for="c1">1</label>
+            <input type="radio" name="clarity" id="c2" value="2" /><label for="c2">2</label>
+            <input type="radio" name="clarity" id="c3" value="3" /><label for="c3">3</label>
+            <input type="radio" name="clarity" id="c4" value="4" /><label for="c4">4</label>
+            <input type="radio" name="clarity" id="c5" value="5" /><label for="c5">5</label>
+          </div>
+          <div class="scale-labels"><span>Not clear at all</span><span>Very clear</span></div>
+        </div>
+
+        <div class="question">
+          <label>How easy was it to start a quiz? <span class="req">*</span></label>
+          <div class="scale">
+            <input type="radio" name="ease" id="e1" value="1" required /><label for="e1">1</label>
+            <input type="radio" name="ease" id="e2" value="2" /><label for="e2">2</label>
+            <input type="radio" name="ease" id="e3" value="3" /><label for="e3">3</label>
+            <input type="radio" name="ease" id="e4" value="4" /><label for="e4">4</label>
+            <input type="radio" name="ease" id="e5" value="5" /><label for="e5">5</label>
+          </div>
+          <div class="scale-labels"><span>Very confusing</span><span>Very easy</span></div>
+        </div>
+
+        <div class="question">
+          <label>Did the app feel fast and responsive? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="speed" value="yes" required /><span>Yes, very fast</span></label>
+            <label class="option"><input type="radio" name="speed" value="mostly" /><span>Mostly, with minor delays</span></label>
+            <label class="option"><input type="radio" name="speed" value="slow" /><span>No, it felt slow</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label>Were the answer options easy to read and tap? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="readability" value="yes" required /><span>Yes, very easy</span></label>
+            <label class="option"><input type="radio" name="readability" value="mostly" /><span>Mostly</span></label>
+            <label class="option"><input type="radio" name="readability" value="no" /><span>No, hard to read or tap</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Content -->
+      <div class="card">
+        <div class="section-title">Content & Accuracy</div>
+
+        <div class="question">
+          <label>Were the explanations after each answer helpful? <span class="req">*</span></label>
+          <div class="scale">
+            <input type="radio" name="explanations" id="ex1" value="1" required /><label for="ex1">1</label>
+            <input type="radio" name="explanations" id="ex2" value="2" /><label for="ex2">2</label>
+            <input type="radio" name="explanations" id="ex3" value="3" /><label for="ex3">3</label>
+            <input type="radio" name="explanations" id="ex4" value="4" /><label for="ex4">4</label>
+            <input type="radio" name="explanations" id="ex5" value="5" /><label for="ex5">5</label>
+          </div>
+          <div class="scale-labels"><span>Not helpful</span><span>Very helpful</span></div>
+        </div>
+
+        <div class="question">
+          <label>Did any questions or answers seem incorrect or confusing?</label>
+          <textarea name="incorrect" placeholder="If yes, please describe..."></textarea>
+        </div>
+
+        <div class="question">
+          <label>Did the difficulty feel appropriate for a citizenship test? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="difficulty" value="easy" required /><span>Too easy</span></label>
+            <label class="option"><input type="radio" name="difficulty" value="right" /><span>Just right</span></label>
+            <label class="option"><input type="radio" name="difficulty" value="hard" /><span>Too hard</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 4: Features -->
+      <div class="card">
+        <div class="section-title">Features</div>
+
+        <div class="question">
+          <label>Which features did you try? <span style="color:#9ca3af;font-weight:400">(select all that apply)</span></label>
+          <div class="options">
+            <label class="option"><input type="checkbox" name="features" value="email" /><span>Email Results</span></label>
+            <label class="option"><input type="checkbox" name="features" value="sms" /><span>SMS Reminder</span></label>
+            <label class="option"><input type="checkbox" name="features" value="continue" /><span>Continue with 10 More Questions</span></label>
+            <label class="option"><input type="checkbox" name="features" value="language" /><span>Different Language</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label>If you used another language, was the translation accurate?</label>
+          <div class="options">
+            <label class="option"><input type="radio" name="translation" value="na" /><span>I only used English</span></label>
+            <label class="option"><input type="radio" name="translation" value="yes" /><span>Yes, very accurate</span></label>
+            <label class="option"><input type="radio" name="translation" value="mostly" /><span>Mostly, minor issues</span></label>
+            <label class="option"><input type="radio" name="translation" value="no" /><span>No, significant errors</span></label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 5: Overall -->
+      <div class="card">
+        <div class="section-title">Overall</div>
+
+        <div class="question">
+          <label>Would you use this app to actually study for the citizenship test? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="would_use" value="yes" required /><span>Yes definitely</span></label>
+            <label class="option"><input type="radio" name="would_use" value="maybe" /><span>Maybe</span></label>
+            <label class="option"><input type="radio" name="would_use" value="no" /><span>No</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label>Would you recommend it to someone preparing for the test? <span class="req">*</span></label>
+          <div class="options">
+            <label class="option"><input type="radio" name="recommend" value="yes" required /><span>Yes</span></label>
+            <label class="option"><input type="radio" name="recommend" value="maybe" /><span>Maybe</span></label>
+            <label class="option"><input type="radio" name="recommend" value="no" /><span>No</span></label>
+          </div>
+        </div>
+
+        <div class="question">
+          <label>Did you encounter any bugs or errors?</label>
+          <textarea name="bugs" placeholder="Please describe any issues you experienced..."></textarea>
+        </div>
+
+        <div class="question">
+          <label>What is the ONE thing you would change or add?</label>
+          <textarea name="suggestion" placeholder="Your most important suggestion..."></textarea>
+        </div>
+
+        <div class="question">
+          <label>Overall rating <span class="req">*</span></label>
+          <div class="scale">
+            <input type="radio" name="rating" id="r1" value="1" required /><label for="r1">1</label>
+            <input type="radio" name="rating" id="r2" value="2" /><label for="r2">2</label>
+            <input type="radio" name="rating" id="r3" value="3" /><label for="r3">3</label>
+            <input type="radio" name="rating" id="r4" value="4" /><label for="r4">4</label>
+            <input type="radio" name="rating" id="r5" value="5" /><label for="r5">5</label>
+            <input type="radio" name="rating" id="r6" value="6" /><label for="r6">6</label>
+            <input type="radio" name="rating" id="r7" value="7" /><label for="r7">7</label>
+            <input type="radio" name="rating" id="r8" value="8" /><label for="r8">8</label>
+            <input type="radio" name="rating" id="r9" value="9" /><label for="r9">9</label>
+            <input type="radio" name="rating" id="r10" value="10" /><label for="r10">10</label>
+          </div>
+          <div class="scale-labels"><span>Terrible</span><span>Amazing</span></div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-btn">Submit Review 🗽</button>
+    </form>
+
+    <!-- Thank you screen -->
+    <div class="card thankyou" id="thankyou">
+      <span class="emoji">🎉</span>
+      <h2>Thank you!</h2>
+      <p>Your feedback means a lot and will help us make citizentest.me better for everyone preparing for their citizenship test.</p>
+      <p style="margin-top:1rem">
+        <a href="https://citizentest.me" style="color:#1d4ed8;font-weight:700">← Back to citizentest.me</a>
+      </p>
+    </div>
+  </div>
+
+  <script>
+    // Update progress bar as user fills out form
+    const form = document.getElementById("survey");
+    const progress = document.getElementById("progress");
+    const required = form.querySelectorAll("[required]");
+
+    function updateProgress() {
+      let filled = 0;
+      const seen = new Set();
+      required.forEach(el => {
+        const name = el.name;
+        if (seen.has(name)) return;
+        seen.add(name);
+        const group = form.querySelectorAll(`[name="${name}"]`);
+        const anyFilled = [...group].some(i => i.value && (i.type !== "radio" || i.checked));
+        if (anyFilled) filled++;
+      });
+      const pct = Math.round((filled / seen.size) * 100);
+      progress.style.width = pct + "%";
+    }
+
+    form.addEventListener("change", updateProgress);
+    form.addEventListener("input", updateProgress);
+
+    async function handleSubmit(e) {
+      e.preventDefault();
+      const btn = form.querySelector(".submit-btn");
+      btn.textContent = "Submitting...";
+      btn.disabled = true;
+
+      try {
+        const res = await fetch("https://formspree.io/f/YOUR_FORM_ID", {
+          method: "POST",
+          body: new FormData(form),
+          headers: { "Accept": "application/json" }
+        });
+
+        if (res.ok) {
+          form.style.display = "none";
+          progress.parentElement.style.display = "none";
+          document.getElementById("thankyou").style.display = "block";
+        } else {
+          throw new Error("Submission failed");
+        }
+      } catch (err) {
+        btn.textContent = "Submit Review 🗽";
+        btn.disabled = false;
+        alert("Something went wrong. Please try again.");
+      }
+    }
+  </script>
+</body>
+</html>

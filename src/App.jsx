@@ -408,7 +408,7 @@
   
         const newTotal = totalRoundsPlayed + 1;
         setTotalRoundsPlayed(newTotal);
-        if (newTotal === 3) setShowSurveyBanner(true);
+        if (newTotal === 1) setShowSurveyBanner(true);
         setScreen("result");
       } else {
         setQIndex(next);

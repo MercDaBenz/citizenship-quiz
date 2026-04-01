@@ -721,7 +721,7 @@
             Based on the official USCIS 100 civics questions
           </p>
           <p style={{textAlign:"center",marginTop:"0.75rem"}}>
-          <a href="https://citizentest.me/survey.html" target="_blank" rel="noreferrer"
+          <a href="/survey"
           style={{fontSize:"0.78rem",color:"#6b7280",textDecoration:"underline"}}>
             📝 Share feedback about this app
           </a>

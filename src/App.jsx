@@ -404,10 +404,11 @@
         setShowEmail(false); setEmailTo(""); setEmailSent(false);
         setShowSMS(false);   setPhone("");   setSmsSent(false);
         setRD(false);
-        setScreen("result");
+  
         const newTotal = totalRoundsPlayed + 1;
         setTotalRoundsPlayed(newTotal);
         if (newTotal === 3) setShowSurveyBanner(true);
+        setScreen("result");
       } else {
         setQIndex(next);
         setSelected(null);

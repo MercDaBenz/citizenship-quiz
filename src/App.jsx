@@ -276,6 +276,7 @@
     const [showEmail, setShowEmail]     = useState(false);
     const [emailTo, setEmailTo]         = useState("");
     const [emailSent, setEmailSent]     = useState(false);
+    const [showSMS, setShowSMS]           = useState(false);  // ← add this line
     const [totalRoundsPlayed, setTotalRoundsPlayed] = useState(0);
     const [showSurveyBanner, setShowSurveyBanner] = useState(false);
     const [phone, setPhone]             = useState("");

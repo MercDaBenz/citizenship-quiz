@@ -424,7 +424,7 @@
       setHistory([]);
       setError("");
       setShowEmail(false); setEmailTo(""); setEmailSent(false);
-      setShowSMS(false);   setPhone("");   setSmsSent(false);
+      setShowSMS(false);   setPhone("");   setSmsSent(false); setSmsError("");
       setRD(false);
       answersRef.current   = [];
       scoreRef.current     = 0;
@@ -628,10 +628,13 @@
                 <div style={{ background:"#fffbeb", border:"2px solid #fde68a", borderRadius:"0.75rem", padding:"0.85rem", margin:"0.5rem 0" }}>
                   <p style={{ fontSize:"0.875rem", fontWeight:600, color:"#374151", marginBottom:"0.3rem" }}>📱 Your phone number:</p>
                   <input style={S.input} type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={e => setPhone(e.target.value)} />
+                  <p style={{ fontSize:"0.875rem", fontWeight:600, color:"#374151", marginBottom:"0.3rem", marginTop:"0.4rem" }}>⏰ Remind me daily at:</p>
+                  <input style={S.input} type="time" value={reminderTime} onChange={e => setReminderTime(e.target.value)} />
+                  {smsError && <p style={{ fontSize:"0.8rem", color:"#b91c1c", marginBottom:"0.3rem" }}>{smsError}</p>}
                   <div style={{ display:"flex", gap:"0.5rem" }}>
-                    <button onClick={sendSMS}
+                    <button onClick={saveReminder}
                       style={{ flex:1, background:"#f59e0b", color:"white", fontWeight:700, padding:"0.45rem", borderRadius:"0.5rem", border:"none", cursor:"pointer", fontSize:"0.875rem" }}>
-                      Send Text
+                      Save Reminder
                     </button>
                     <button onClick={() => setShowSMS(false)}
                       style={{ padding:"0.45rem 0.9rem", borderRadius:"0.5rem", border:"2px solid #e5e7eb", color:"#6b7280", background:"white", cursor:"pointer", fontSize:"0.875rem" }}>
@@ -720,6 +723,50 @@
           <p style={{ textAlign:"center", fontSize:"0.72rem", color:"#9ca3af", marginTop:"0.55rem" }}>
             Based on the official USCIS 100 civics questions
           </p>
+
+          {/* ── Daily reminder opt-in ── */}
+          {!smsSent ? (
+            <div style={{ marginTop:"1rem", background:"#fffbeb", border:"2px solid #fde68a", borderRadius:"0.75rem", padding:"0.85rem" }}>
+              {!showSMS ? (
+                <>
+                  <p style={{ fontWeight:700, color:"#92400e", fontSize:"0.875rem", margin:"0 0 0.2rem" }}>🔔 Daily Practice Reminders</p>
+                  <p style={{ color:"#b45309", fontSize:"0.8rem", margin:"0 0 0.55rem", lineHeight:1.4 }}>
+                    Get a free daily text to keep your study streak going.
+                  </p>
+                  <button onClick={() => setShowSMS(true)}
+                    style={{ width:"100%", background:"#f59e0b", color:"white", fontWeight:700, padding:"0.5rem", borderRadius:"0.5rem", border:"none", cursor:"pointer", fontSize:"0.875rem" }}>
+                    📱 Text Me Daily Reminders
+                  </button>
+                </>
+              ) : (
+                <>
+                  <p style={{ fontSize:"0.875rem", fontWeight:600, color:"#374151", marginBottom:"0.3rem" }}>📱 Your phone number:</p>
+                  <input style={S.input} type="tel" placeholder="+1 (555) 000-0000" value={phone} onChange={e => setPhone(e.target.value)} />
+                  <p style={{ fontSize:"0.875rem", fontWeight:600, color:"#374151", margin:"0.4rem 0 0.3rem" }}>⏰ Remind me daily at:</p>
+                  <input style={S.input} type="time" value={reminderTime} onChange={e => setReminderTime(e.target.value)} />
+                  {smsError && <p style={{ fontSize:"0.8rem", color:"#b91c1c", margin:"0.2rem 0" }}>{smsError}</p>}
+                  <div style={{ display:"flex", gap:"0.5rem", marginTop:"0.3rem" }}>
+                    <button onClick={saveReminder}
+                      style={{ flex:1, background:"#f59e0b", color:"white", fontWeight:700, padding:"0.45rem", borderRadius:"0.5rem", border:"none", cursor:"pointer", fontSize:"0.875rem" }}>
+                      Save Reminder
+                    </button>
+                    <button onClick={() => { setShowSMS(false); setSmsError(""); }}
+                      style={{ padding:"0.45rem 0.9rem", borderRadius:"0.5rem", border:"2px solid #e5e7eb", color:"#6b7280", background:"white", cursor:"pointer", fontSize:"0.875rem" }}>
+                      Cancel
+                    </button>
+                  </div>
+                  <p style={{ fontSize:"0.7rem", color:"#9ca3af", marginTop:"0.5rem", textAlign:"center" }}>
+                    US numbers only. Reply STOP to cancel anytime.
+                  </p>
+                </>
+              )}
+            </div>
+          ) : (
+            <div style={{ marginTop:"1rem", background:"#f0fdf4", border:"2px solid #bbf7d0", borderRadius:"0.75rem", padding:"0.75rem", textAlign:"center", fontSize:"0.875rem", color:"#15803d", fontWeight:600 }}>
+              📱 You're signed up for daily reminders!
+            </div>
+          )}
+
           <p style={{textAlign:"center",marginTop:"0.75rem"}}>
           <a href="/survey"
           style={{fontSize:"0.78rem",color:"#6b7280",textDecoration:"underline"}}>

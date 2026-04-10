@@ -4,7 +4,7 @@
 // so Claude is only called once per question per language — ever.
 
 const https    = require("https");
-const { DynamoDBClient, GetItemCommand, PutItemCommand, ScanCommand } = require("@aws-sdk/client-dynamodb");
+const { DynamoDBClient, GetItemCommand, PutItemCommand, ScanCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
 const { SecretsManagerClient, GetSecretValueCommand } = require("@aws-sdk/client-secrets-manager");
 
 const dynamo = new DynamoDBClient({ region: process.env.AWS_REGION });
@@ -74,7 +74,11 @@ async function callClaude(apiKey, prompt) {
             const text   = parsed.content?.[0]?.text || "";
             // Strip any accidental code fences
             const clean  = text.replace(/```[\w]*\n?/g, "").replace(/```/g, "").trim();
-            resolve(JSON.parse(clean));
+            resolve({
+              question: JSON.parse(clean),
+              usage:    parsed.usage || {},   // { input_tokens, output_tokens }
+              model:    parsed.model  || "claude-sonnet-4-20250514",
+            });
           } catch (e) {
             reject(new Error("Failed to parse Claude response: " + data.slice(0, 200)));
           }
@@ -109,6 +113,36 @@ async function putCached(language, index, questionObj) {
       // TTL: never expires (USCIS questions don't change)
     },
   }));
+}
+
+// ── Token usage logging ───────────────────────────────────────────────────────
+// Writes daily token counters to the same DynamoDB table using atomic ADDs.
+// Key format: "USAGE#YYYY-MM-DD"
+async function logUsage(model, inputTokens, outputTokens) {
+  const today = new Date().toISOString().split("T")[0];
+  try {
+    await dynamo.send(new UpdateItemCommand({
+      TableName: TABLE_NAME,
+      Key: { pk: { S: `USAGE#${today}` } },
+      UpdateExpression:
+        "ADD inputTokens :i, outputTokens :o, callCount :c " +
+        "SET #m = :model, #d = :date",
+      ExpressionAttributeNames: {
+        "#m": "model",
+        "#d": "date",
+      },
+      ExpressionAttributeValues: {
+        ":i":     { N: String(inputTokens  || 0) },
+        ":o":     { N: String(outputTokens || 0) },
+        ":c":     { N: "1" },
+        ":model": { S: model },
+        ":date":  { S: today },
+      },
+    }));
+  } catch (err) {
+    // Never let logging failures break the main request
+    console.error("logUsage error:", err.message);
+  }
 }
 
 // ── Shuffle helper ────────────────────────────────────────────────────────────
@@ -161,7 +195,11 @@ exports.handler = async (event) => {
           `Return ONLY a raw JSON object with keys: question, options (array of 4 strings), answer (A/B/C/D), explanation. ` +
           `Write everything in ${language}.`;
 
-        cached = await callClaude(apiKey, prompt);
+        const { question, usage, model } = await callClaude(apiKey, prompt);
+        cached = question;
+
+        // Log token usage for cost tracking (fire-and-forget)
+        logUsage(model, usage.input_tokens, usage.output_tokens);
 
         // Validate before caching
         if (

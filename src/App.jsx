@@ -583,6 +583,11 @@ function buildEmailBody(rounds) {
                       Cancel
                     </button>
                   </div>
+                  <p style={{ fontSize:"0.72rem", color:"#475569", marginTop:"0.5rem", lineHeight:1.5 }}>
+                    By tapping Save Reminder, you agree to receive recurring automated SMS study reminders from CitizenTest. Message frequency: 1 per day. Message &amp; data rates may apply. Reply STOP to cancel, HELP for help. See our{" "}
+                    <a href="/sms-terms" style={{ color:"#2563eb", textDecoration:"underline" }}>SMS Terms</a>{" "}and{" "}
+                    <a href="/privacy" style={{ color:"#2563eb", textDecoration:"underline" }}>Privacy Policy</a>.
+                  </p>
                 </div>
               )}
               {smsSent && (
@@ -697,8 +702,10 @@ function buildEmailBody(rounds) {
                       Cancel
                     </button>
                   </div>
-                  <p style={{ fontSize:"0.75rem", color:"#475569", marginTop:"0.6rem", lineHeight:1.4 }}>
-                    By entering your phone number, you consent to receive recurring automated SMS reminders from CitizenTest (citizentest.me). Message frequency: 1 per day. Message & data rates may apply. Reply STOP to cancel, HELP for help.
+                  <p style={{ fontSize:"0.75rem", color:"#475569", marginTop:"0.6rem", lineHeight:1.5 }}>
+                    By tapping Save Reminder, you agree to receive recurring automated SMS study reminders from CitizenTest. Message frequency: 1 per day. Message &amp; data rates may apply. Reply STOP to cancel, HELP for help. See our{" "}
+                    <a href="/sms-terms" style={{ color:"#2563eb", textDecoration:"underline" }}>SMS Terms</a>{" "}and{" "}
+                    <a href="/privacy" style={{ color:"#2563eb", textDecoration:"underline" }}>Privacy Policy</a>.
                   </p>
                 </>
               )}
@@ -720,6 +727,8 @@ function buildEmailBody(rounds) {
             <a href="/privacy" style={{ color:"#2563eb", textDecoration:"underline" }}>Privacy Policy</a>
             <span style={{ margin: "0 0.4rem" }}>·</span>
             <a href="/terms" style={{ color:"#2563eb", textDecoration:"underline" }}>Terms of Service</a>
+            <span style={{ margin: "0 0.4rem" }}>·</span>
+            <a href="/reminders" style={{ color:"#2563eb", textDecoration:"underline" }}>SMS Reminders</a>
           </p>
           <p style={{ margin:"0.35rem 0" }}>CitizenTest is a free U.S. citizenship civics exam practice tool.</p>
         </footer>

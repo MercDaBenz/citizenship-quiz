@@ -1,7 +1,8 @@
   import { useState, useEffect, useRef } from "react";
   
   const LANGUAGES = ["English","Spanish","French","Portuguese","Chinese","Arabic","Vietnamese","Korean","Tagalog","Hindi"];
-  const API_URL = import.meta.env.VITE_API_URL || "https://api.anthropic.com/v1/messages";
+  const API_URL      = import.meta.env.VITE_API_URL      || "http://localhost:3001/quiz";
+const REMINDER_URL = import.meta.env.VITE_REMINDER_URL || API_URL.replace(/\/quiz$/, "/reminder");
   
   const TITLE_TRANSLATIONS = [
     { text: "Let's Make You a Citizen!", lang: "English" },
@@ -109,23 +110,7 @@
     { q: "Name two national U.S. holidays.", a: "New Year's Day, Martin Luther King Jr. Day, Presidents Day, Memorial Day, Independence Day, Labor Day, Veterans Day, Thanksgiving, Christmas" },
   ];
   
-  const SYSTEM_PROMPT = `You are a U.S. citizenship test quiz generator. You will receive a list of civics questions with their official answers.
-  Your job is to turn each one into a multiple choice question with 4 options.
-  
-  OUTPUT FORMAT: Return ONLY a raw JSON array. No markdown. No code fences. No explanation. Begin your entire response with [ and end with ].
-  
-  Each item in the array must look exactly like this:
-  {"question":"...","options":["option text A","option text B","option text C","option text D"],"answer":"A","explanation":"..."}
-  
-  Rules:
-  - "answer" must be exactly "A", "B", "C", or "D" — nothing else
-  - options is an array of exactly 4 strings
-  - Randomly place the correct answer at position A, B, C, or D
-  - Write 3 wrong but plausible distractors
-  - Write all text in the language specified by the user
-  - Explanations should be 1 sentence`;
-  
-  // ─── SVG Background ───────────────────────────────────────────────────────────
+// ─── SVG Background ───────────────────────────────────────────────────────────
   function USBackground() {
     return (
       <svg
@@ -209,34 +194,7 @@
     return a;
   }
   
-  function parseStreamedQuestions(text) {
-    const clean = text.replace(/```[\w]*\n?/g, "").replace(/```/g, "").trim();
-    const results = [];
-    let depth = 0, start = -1;
-    for (let i = 0; i < clean.length; i++) {
-      if (clean[i] === "{") { if (depth === 0) start = i; depth++; }
-      else if (clean[i] === "}") {
-        depth--;
-        if (depth === 0 && start !== -1) {
-          try {
-            const obj = JSON.parse(clean.slice(start, i + 1));
-            if (
-              typeof obj.question === "string" &&
-              Array.isArray(obj.options) && obj.options.length === 4 &&
-              ["A","B","C","D"].includes(obj.answer) &&
-              typeof obj.explanation === "string"
-            ) {
-              results.push(obj);
-            }
-          } catch (_) {}
-          start = -1;
-        }
-      }
-    }
-    return results;
-  }
-  
-  function buildEmailBody(rounds) {
+function buildEmailBody(rounds) {
     return rounds.map((r, i) => {
       const pct = Math.round((r.score / r.total) * 100);
       const header = `Round ${i + 1} — Score: ${r.score}/${r.total} (${pct}%)`;
@@ -262,7 +220,6 @@
   
     // quiz state
     const [questions, setQuestions] = useState([]);   // all 10, set once stream is complete
-    const [totalQ, setTotalQ]       = useState(10);
     const [qIndex, setQIndex]       = useState(0);
     const [selected, setSelected]   = useState(null);
     const [revealed, setRevealed]   = useState(false);
@@ -276,9 +233,8 @@
     const [showEmail, setShowEmail]     = useState(false);
     const [emailTo, setEmailTo]         = useState("");
     const [emailSent, setEmailSent]     = useState(false);
-    const [showSMS, setShowSMS]           = useState(false);  // ← add this line
+    const [showSMS, setShowSMS]           = useState(false);
     const [totalRoundsPlayed, setTotalRoundsPlayed] = useState(0);
-    const [showSurveyBanner, setShowSurveyBanner] = useState(false);
     const [phone, setPhone]             = useState("");
     const [reminderTime, setReminderTime] = useState("09:00");
     const [smsSent, setSmsSent]         = useState(false);
@@ -315,14 +271,12 @@
   
       const picked = pickBatch(usedIdx);
       setUsedIdx(prev => [...prev, ...picked]);
-      const batch = picked.map(i => USCIS_QA[i]);
   
       // reset round
       answersRef.current   = [];
       scoreRef.current     = 0;
       questionsRef.current = [];
       setQuestions([]);
-      setTotalQ(10);
       setQIndex(0);
       setSelected(null);
       setRevealed(false);
@@ -330,16 +284,6 @@
   
       // add pending history entry
       setHistory(h => [...h, { questions: [], answers: [], score: 0, total: 10, pending: true }]);
-  
-      const qaText = batch
-        .map((item, i) => `${i + 1}. Q: ${item.q}\n   Official answer: ${item.a}`)
-        .join("\n\n");
-  
-      const userPrompt =
-        `Language: ${language}\n\n` +
-        `Here are 10 official U.S. citizenship questions. Convert each into a multiple-choice question.\n\n` +
-        `${qaText}\n\n` +
-        `Remember: respond with ONLY a raw JSON array starting with [ and ending with ].`;
   
       try {
       // Send question indices + raw USCIS data to backend
@@ -364,9 +308,8 @@
       const finalQs = data.questions;
       questionsRef.current = finalQs;
       setQuestions(finalQs);
-      setTotalQ(finalQs.length);
-      setHistory(h => h.map((e, i) =>
-        i === h.length - 1 ? { ...e, questions: finalQs, total: finalQs.length } : e
+      setHistory(h => h.map((entry, i) =>
+        i === h.length - 1 ? { ...entry, questions: finalQs, total: finalQs.length } : entry
       ));
       setStarting(false);
       setScreen("quiz");
@@ -408,7 +351,6 @@
   
         const newTotal = totalRoundsPlayed + 1;
         setTotalRoundsPlayed(newTotal);
-        if (newTotal === 1) setShowSurveyBanner(true);
         setScreen("result");
       } else {
         setQIndex(next);
@@ -458,7 +400,7 @@
       const utcHour = localDate.getUTCHours();
   
       try {
-        const res = await fetch(API_URL.replace("/quiz", "/reminder"), {
+        const res = await fetch(REMINDER_URL, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -645,7 +587,7 @@
               )}
               {smsSent && (
                 <div style={{ background:"#f0fdf4", border:"2px solid #bbf7d0", borderRadius:"0.65rem", padding:"0.65rem", textAlign:"center", fontSize:"0.875rem", color:"#15803d", fontWeight:600, margin:"0.5rem 0" }}>
-                  📱 Text opened — hit Send in your messaging app!
+                  📱 You're signed up for daily reminders!
                 </div>
               )}
   
@@ -666,7 +608,7 @@
     // ── Home ──
     const titleEntry = TITLE_TRANSLATIONS[titleIdx];
     return (
-      <div style={S.wrap}>
+      <div style={{ ...S.wrap, flexDirection: "column" }}>
         <USBackground />
         <div style={{ ...S.card, maxWidth:"460px" }}>
           <div style={{ textAlign:"center", marginBottom:"1.4rem" }}>
@@ -755,8 +697,8 @@
                       Cancel
                     </button>
                   </div>
-                  <p style={{ fontSize:"0.7rem", color:"#9ca3af", marginTop:"0.5rem", textAlign:"center" }}>
-                    US numbers only. Reply STOP to cancel anytime.
+                  <p style={{ fontSize:"0.75rem", color:"#475569", marginTop:"0.6rem", lineHeight:1.4 }}>
+                    By entering your phone number, you consent to receive recurring automated SMS reminders from CitizenTest (citizentest.me). Message frequency: 1 per day. Message & data rates may apply. Reply STOP to cancel, HELP for help.
                   </p>
                 </>
               )}
@@ -767,13 +709,20 @@
             </div>
           )}
 
-          <p style={{textAlign:"center",marginTop:"0.75rem"}}>
-          <a href="/survey"
-          style={{fontSize:"0.78rem",color:"#6b7280",textDecoration:"underline"}}>
-            📝 Share feedback about this app
-          </a>
+          <p style={{ textAlign:"center", marginTop:"0.75rem" }}>
+            <a href="/survey" style={{ fontSize:"0.78rem", color:"#6b7280", textDecoration:"underline" }}>
+              Share feedback about this app
+            </a>
           </p>
         </div>
+        <footer style={{ paddingTop:"1rem", textAlign:"center", color:"#94a3b8", fontSize:"0.78rem" }}>
+          <p style={{ margin:"0.35rem 0" }}>
+            <a href="/privacy" style={{ color:"#2563eb", textDecoration:"underline" }}>Privacy Policy</a>
+            <span style={{ margin: "0 0.4rem" }}>·</span>
+            <a href="/terms" style={{ color:"#2563eb", textDecoration:"underline" }}>Terms of Service</a>
+          </p>
+          <p style={{ margin:"0.35rem 0" }}>CitizenTest is a free U.S. citizenship civics exam practice tool.</p>
+        </footer>
       </div>
     );
   }

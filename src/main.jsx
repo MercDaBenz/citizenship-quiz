@@ -6,6 +6,8 @@ import App from './App.jsx'
 import Survey from './Survey.jsx'
 import Privacy from './Privacy.jsx'
 import Terms from './Terms.jsx'
+import SmsTerms from './SmsTerms.jsx'
+import Reminders from './Reminders.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -14,6 +16,8 @@ createRoot(document.getElementById('root')).render(
         <Route path="/" element={<App />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/sms-terms" element={<SmsTerms />} />
+        <Route path="/reminders" element={<Reminders />} />
         <Route path="/survey" element={<Survey />} />
       </Routes>
     </BrowserRouter>
